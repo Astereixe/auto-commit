@@ -1,7 +1,7 @@
 name: Past Auto Commit
 
 on:
-  push:  # Trigger pertama kali saat ada push
+  push:  
     branches:
       - main
   schedule:
@@ -19,7 +19,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          ref: main  # Pastikan branch yang di-checkout adalah 'main'
+          ref: main  
 
       - name: Calculate Date and Commit
         run: |
@@ -38,7 +38,7 @@ jobs:
           last_commit_date=$(cat .last_commit_date)
 
           # Tambah 1 hari ke tanggal terakhir
-          next_commit_date=$(date -d "$last_commit_date +1 day" '+%Y-%m-%dT%H:%M:%SZ')
+          next_commit_date=$(date -d "$last_commit_date +1 day")
 
           # Simpan tanggal berikutnya untuk commit berikutnya
           echo "$next_commit_date" > .last_commit_date
@@ -53,21 +53,6 @@ jobs:
 
           # Tambahkan perubahan dan lakukan commit dengan tanggal khusus
           git add -A
-
-          # Array untuk pesan commit
-          arr[0]="commit $next_commit_date"
-          # arr[1]="chore(bot): 😱 auto commit"
-          # arr[2]="chore(bot): 👿 auto commit"
-          # arr[3]="chore(bot): 💩 auto commit"
-          # arr[4]="chore(bot): 🙏 auto commit"
-          # arr[5]="chore(bot): 🙈 auto commit"
-          # arr[6]="chore(bot): 🐐 auto commit"
-          # arr[7]="chore(bot): 🤖 auto commit"
-          # arr[8]="chore(bot): 🟩 auto commit"
-          # arr[9]="chore(bot): 👻 auto commit"
-
-          # Pilih pesan commit secara acak
-          # rand=$((RANDOM % ${#arr[@]}))
 
           # Commit dengan tanggal khusus
           GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "${arr[0]}"
