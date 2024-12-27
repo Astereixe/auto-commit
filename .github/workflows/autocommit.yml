@@ -43,6 +43,9 @@ jobs:
           # Simpan timestamp berikutnya untuk commit berikutnya
           echo "$next_commit_timestamp" > .last_commit_date
 
+          # Konversi timestamp Unix ke format tanggal yang valid untuk git commit
+          next_commit_date=$(date -u -d "1970-01-01 $next_commit_timestamp sec" '+%Y-%m-%dT%H:%M:%SZ')
+
           # Update file sebagai bagian dari perubahan
           echo "Last updated at Unix timestamp: $next_commit_timestamp" > FILE
           echo "Updated .last_commit_date with: $next_commit_timestamp"
@@ -55,7 +58,7 @@ jobs:
           git add -A
 
           # Commit dengan pesan timestamp Unix
-          GIT_COMMITTER_DATE="$(date -d @$next_commit_timestamp '+%Y-%m-%dT%H:%M:%SZ')" git commit --date="$(date -d @$next_commit_timestamp '+%Y-%m-%dT%H:%M:%SZ')" -m "Auto commit at Unix timestamp: $next_commit_timestamp"
+          GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "Auto commit at Unix timestamp: $next_commit_timestamp"
 
       - name: GitHub Push to Main
         uses: ad-m/github-push-action@v0.6.0
