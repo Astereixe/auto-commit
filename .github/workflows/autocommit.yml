@@ -23,10 +23,10 @@ jobs:
 
       - name: Calculate Date and Commit
         run: |
-          # Hitung tanggal 150 hari lalu jika belum ada file .last_commit_date
+          # Hitung timestamp 150 hari lalu jika belum ada file .last_commit_date
           if [ ! -f .last_commit_date ]; then
             if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-              start_date=$(date -d "150 days ago" '+%Y-%m-%dT%H:%M:%SZ')
+              start_date=$(date -d "150 days ago" +%s)
               echo "$start_date" > .last_commit_date
             else
               echo "::error::Trigger pertama harus dari push untuk menginisialisasi tanggal!"
@@ -34,28 +34,28 @@ jobs:
             fi
           fi
 
-          # Ambil tanggal terakhir dari file
-          last_commit_date=$(cat .last_commit_date)
+          # Ambil timestamp terakhir dari file
+          last_commit_timestamp=$(cat .last_commit_date)
 
-          # Tambah 1 hari ke tanggal terakhir
-          next_commit_date=$(date -d "$last_commit_date +1 day")
+          # Tambah 1 hari (86400 detik) ke timestamp terakhir
+          next_commit_timestamp=$((last_commit_timestamp + 86400))
 
-          # Simpan tanggal berikutnya untuk commit berikutnya
-          echo "$next_commit_date" > .last_commit_date
+          # Simpan timestamp berikutnya untuk commit berikutnya
+          echo "$next_commit_timestamp" > .last_commit_date
 
           # Update file sebagai bagian dari perubahan
-          echo "Last updated at: $next_commit_date" > FILE
-          echo "Updated .last_commit_date with: $next_commit_date"
+          echo "Last updated at Unix timestamp: $next_commit_timestamp" > FILE
+          echo "Updated .last_commit_date with: $next_commit_timestamp"
 
           # Konfigurasi Git
           git config --local user.email "flipanddown@gmail.com"
           git config --local user.name "Astereixe"
 
-          # Tambahkan perubahan dan lakukan commit dengan tanggal khusus
+          # Tambahkan perubahan dan lakukan commit dengan timestamp Unix sebagai pesan commit
           git add -A
 
-          # Commit dengan tanggal khusus
-          GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "${arr[0]}"
+          # Commit dengan pesan timestamp Unix
+          GIT_COMMITTER_DATE="$(date -d @$next_commit_timestamp '+%Y-%m-%dT%H:%M:%SZ')" git commit --date="$(date -d @$next_commit_timestamp '+%Y-%m-%dT%H:%M:%SZ')" -m "Auto commit at Unix timestamp: $next_commit_timestamp"
 
       - name: GitHub Push to Main
         uses: ad-m/github-push-action@v0.6.0
@@ -67,6 +67,6 @@ jobs:
       - name: Debugging Steps
         run: |
           echo "Current Branch: $(git branch --show-current)"
-          echo "Last Commit Date: $(cat .last_commit_date || echo 'Not Found')"
+          echo "Last Commit Date (Unix timestamp): $(cat .last_commit_date || echo 'Not Found')"
           echo "File Content:"
           cat FILE || echo "FILE not found"
