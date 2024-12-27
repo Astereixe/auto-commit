@@ -4,8 +4,8 @@ on:
   push:  # Trigger pertama kali saat ada push
     branches:
       - main
-  schedule:  # Trigger berikutnya oleh cron setiap menit
-    - cron: "* * * * *"
+  schedule:
+    - cron: '*/5 * * * *'
 
 jobs:
   auto_commit:
@@ -55,22 +55,22 @@ jobs:
           git add -A
 
           # Array untuk pesan commit
-          arr[0]="chore(bot): 😂 auto commit"
-          arr[1]="chore(bot): 😱 auto commit"
-          arr[2]="chore(bot): 👿 auto commit"
-          arr[3]="chore(bot): 💩 auto commit"
-          arr[4]="chore(bot): 🙏 auto commit"
-          arr[5]="chore(bot): 🙈 auto commit"
-          arr[6]="chore(bot): 🐐 auto commit"
-          arr[7]="chore(bot): 🤖 auto commit"
-          arr[8]="chore(bot): 🟩 auto commit"
-          arr[9]="chore(bot): 👻 auto commit"
+          arr[0]="commit $next_commit_date"
+          # arr[1]="chore(bot): 😱 auto commit"
+          # arr[2]="chore(bot): 👿 auto commit"
+          # arr[3]="chore(bot): 💩 auto commit"
+          # arr[4]="chore(bot): 🙏 auto commit"
+          # arr[5]="chore(bot): 🙈 auto commit"
+          # arr[6]="chore(bot): 🐐 auto commit"
+          # arr[7]="chore(bot): 🤖 auto commit"
+          # arr[8]="chore(bot): 🟩 auto commit"
+          # arr[9]="chore(bot): 👻 auto commit"
 
           # Pilih pesan commit secara acak
-          rand=$((RANDOM % ${#arr[@]}))
+          # rand=$((RANDOM % ${#arr[@]}))
 
           # Commit dengan tanggal khusus
-          GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "${arr[$rand]}"
+          GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "${arr[0]}"
 
       - name: GitHub Push to Main
         uses: ad-m/github-push-action@v0.6.0
