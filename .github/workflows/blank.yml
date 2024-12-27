@@ -1,4 +1,4 @@
-name: past auto commit
+name: Past Auto Commit
 
 on:
   push:  # Trigger pertama kali saat ada push
@@ -72,9 +72,10 @@ jobs:
           # Commit dengan tanggal khusus
           GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "${arr[$rand]}"
 
-      - name: GitHub Push
+      - name: GitHub Push to Main
         uses: ad-m/github-push-action@v0.6.0
         with:
+          branch: main  # Pastikan push dilakukan ke branch 'main'
           directory: "."
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
