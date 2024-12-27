@@ -1,0 +1,69 @@
+name: Auto commit
+
+on:
+  schedule:
+    - cron: "* * * * *" # Menjalankan workflow setiap 1 menit
+
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: DEBUG
+        run: echo "::debug::Ref = ${{ github.ref }}"
+
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Calculate Date and Commit
+        run: |
+          # Hitung tanggal 150 hari lalu
+          if [ ! -f .last_commit_date ]; then
+            start_date=$(date -d "150 days ago" '+%Y-%m-%dT%H:%M:%SZ')
+            echo "$start_date" > .last_commit_date
+          fi
+
+          # Ambil tanggal terakhir
+          last_commit_date=$(cat .last_commit_date)
+
+          # Tambah 1 menit ke tanggal terakhir
+          next_commit_date=$(date -d "$last_commit_date +1 minute" '+%Y-%m-%dT%H:%M:%SZ')
+
+          # Simpan tanggal berikutnya untuk commit berikutnya
+          echo "$next_commit_date" > .last_commit_date
+
+          # Update file sebagai bagian dari perubahan
+          echo "Last updated at: $next_commit_date" > FILE
+
+          # Konfigurasi Git
+          git config --local user.email "flipanddown@gmail.com"
+          git config --local user.name "Astereixe"
+
+          # Tambahkan perubahan dan lakukan commit dengan tanggal khusus
+          git add -A
+
+          # Array untuk pesan commit
+          arr[0]="chore(bot): 😂 auto commit"
+          arr[1]="chore(bot): 😱 auto commit"
+          arr[2]="chore(bot): 👿 auto commit"
+          arr[3]="chore(bot): 💩 auto commit"
+          arr[4]="chore(bot): 🙏 auto commit"
+          arr[5]="chore(bot): 🙈 auto commit"
+          arr[6]="chore(bot): 🐐 auto commit"
+          arr[7]="chore(bot): 🤖 auto commit"
+          arr[8]="chore(bot): 🟩 auto commit"
+          arr[9]="chore(bot): 👻 auto commit"
+
+          # Pilih pesan commit secara acak
+          rand=$((RANDOM % ${#arr[@]}))
+
+          # Commit dengan tanggal khusus
+          GIT_COMMITTER_DATE="$next_commit_date" git commit --date="$next_commit_date" -m "${arr[$rand]}"
+
+      - name: GitHub Push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          directory: "."
+          github_token: ${{ secrets.GITHUB_TOKEN }}
