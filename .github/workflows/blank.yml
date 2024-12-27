@@ -1,4 +1,4 @@
-name: Auto commit
+name: past auto commit
 
 on:
   push:  # Trigger pertama kali saat ada push
@@ -12,19 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: DEBUG
-        run: echo "::debug::Ref = ${{ github.ref }}"
+      - name: Set Environment Variables
+        run: echo "GITHUB_EVENT_NAME=${{ github.event_name }}" >> $GITHUB_ENV
 
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
           fetch-depth: 0
+          ref: main  # Pastikan branch yang di-checkout adalah 'main'
 
       - name: Calculate Date and Commit
         run: |
-          # Hitung tanggal 150 hari lalu
+          # Hitung tanggal 150 hari lalu jika belum ada file .last_commit_date
           if [ ! -f .last_commit_date ]; then
-            if [[ "${{ github.event_name }}" == "push" ]]; then
+            if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
               start_date=$(date -d "150 days ago" '+%Y-%m-%dT%H:%M:%SZ')
               echo "$start_date" > .last_commit_date
             else
@@ -33,10 +34,10 @@ jobs:
             fi
           fi
 
-          # Ambil tanggal terakhir
+          # Ambil tanggal terakhir dari file
           last_commit_date=$(cat .last_commit_date)
 
-          # Tambah 1 menit ke tanggal terakhir
+          # Tambah 1 hari ke tanggal terakhir
           next_commit_date=$(date -d "$last_commit_date +1 day" '+%Y-%m-%dT%H:%M:%SZ')
 
           # Simpan tanggal berikutnya untuk commit berikutnya
@@ -44,6 +45,7 @@ jobs:
 
           # Update file sebagai bagian dari perubahan
           echo "Last updated at: $next_commit_date" > FILE
+          echo "Updated .last_commit_date with: $next_commit_date"
 
           # Konfigurasi Git
           git config --local user.email "flipanddown@gmail.com"
@@ -75,3 +77,10 @@ jobs:
         with:
           directory: "."
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debugging Steps
+        run: |
+          echo "Current Branch: $(git branch --show-current)"
+          echo "Last Commit Date: $(cat .last_commit_date || echo 'Not Found')"
+          echo "File Content:"
+          cat FILE || echo "FILE not found"
